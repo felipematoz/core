@@ -39,6 +39,9 @@ use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\RedirectResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\ISession;
+use OCP\AppFramework\Controller;
+use OCP\IUser;
+use OCP\IUserSession;
 
 
 class SecurityMiddlewareTest extends \Test\TestCase {
@@ -53,11 +56,13 @@ class SecurityMiddlewareTest extends \Test\TestCase {
 	private $navigationManager;
 	private $urlGenerator;
 	private $contentSecurityPolicyManager;
+	/** @var IUserSession | \PHPUnit_Framework_MockObject_MockObject */
+	private $session;
 
 	protected function setUp() {
 		parent::setUp();
 
-		$this->controller = $this->getMockBuilder('OCP\AppFramework\Controller')
+		$this->controller = $this->getMockBuilder(Controller::class)
 			->disableOriginalConstructor()
 				->getMock();
 		$this->reader = new ControllerMethodReflector();
@@ -92,14 +97,16 @@ class SecurityMiddlewareTest extends \Test\TestCase {
 	 * @return SecurityMiddleware
 	 */
 	private function getMiddleware($isLoggedIn, $isAdminUser) {
+		$this->session = $this->createMock(IUserSession::class);
+		$this->session->expects($this->any())->method('isLoggedIn')->willReturn($isLoggedIn);
 		return new SecurityMiddleware(
 			$this->request,
 			$this->reader,
 			$this->navigationManager,
 			$this->urlGenerator,
 			$this->logger,
+			$this->session,
 			'files',
-			$isLoggedIn,
 			$isAdminUser,
 			$this->contentSecurityPolicyManager
 		);
