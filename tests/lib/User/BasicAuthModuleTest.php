@@ -51,10 +51,10 @@ class BasicAuthModuleTest extends TestCase {
 
 		$this->user->expects($this->any())->method('getUID')->willReturn('user1');
 
-		$this->session->expects($this->any())->method('logClientIn')
+		$this->session->expects($this->any())->method('login')
 			->willReturnMap([
-				['user1', '123456', $this->request, true],
-				['user2', '123456', $this->request, false],
+				['user1', '123456', false, true],
+				['user2', '123456', false, false],
 			]);
 
 		$this->manager->expects($this->any())->method('get')->willReturn($this->user);

@@ -53,9 +53,18 @@ class BasicAuthModule implements IAuthModule {
 			return null;
 		}
 
-		// reuse logClientIn because this method handles app passwords as well as regular credentials
-		if (!$this->session->logClientIn($request->server['PHP_AUTH_USER'], $request->server['PHP_AUTH_PW'], $request)) {
-			throw new \Exception('Invalid credentials');
+		$user = $request->server['PHP_AUTH_USER'];
+		$password = $request->server['PHP_AUTH_PW'];
+		// reuse login because this method handles app passwords as well as regular credentials
+		if (!$this->session->login($user, $password, false) ) {
+			$users = $this->manager->getByEmail($user);
+			if (count($users) === 1) {
+				if (!$this->session->login($users[0]->getUID(), $password, false)) {
+					throw new \Exception('Invalid credentials');
+				}
+			} else {
+				throw new \Exception('Invalid credentials');
+			}
 		}
 
 		return $this->manager->get($request->server['PHP_AUTH_USER']);

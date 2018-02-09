@@ -302,8 +302,10 @@ class Session implements IUserSession, Emitter {
 	 * @return boolean|null
 	 * @throws LoginException
 	 */
-	public function login($uid, $password) {
-		$this->session->regenerateId();
+	public function login($uid, $password, $recreateSession = true) {
+		if ($recreateSession) {
+			$this->session->regenerateId();
+		}
 
 		if ($this->validateToken($password, $uid)) {
 			return $this->loginWithToken($password);
